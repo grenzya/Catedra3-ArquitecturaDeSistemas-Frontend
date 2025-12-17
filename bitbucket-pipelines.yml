@@ -1,0 +1,41 @@
+image: atlassian/default-image:3
+
+definitions:
+   services:
+      docker:
+         memory: 3072
+pipelines:
+  branches:
+    main:
+      - step:
+          name: Build and Test
+          script:
+            - IMAGE_NAME=$BITBUCKET_REPO_SLUG
+            - docker build . --file Dockerfile --tag ${IMAGE_NAME} --build-arg backend_url=${PROD_API_URL}
+            - docker save ${IMAGE_NAME} --output "${IMAGE_NAME}.tar"
+          services:
+            - docker
+          caches:
+            - docker
+          artifacts:
+            - "*.tar"
+      - step:
+          name: Deploy to Production
+          deployment: Production
+          script:
+            - echo ${DOCKERHUB_PASSWORD} | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+            - IMAGE_NAME=$BITBUCKET_REPO_SLUG
+            - docker load --input "${IMAGE_NAME}.tar"
+            # - VERSION="prod-0.1.${BITBUCKET_BUILD_NUMBER}"
+            - VERSION=${BITBUCKET_BUILD_NUMBER}
+            # - IMAGE=${DOCKERHUB_NAMESPACE}/${IMAGE_NAME}
+            - IMAGE=${DOCKERHUB_NAMESPACE}/${DOCKER_IMG_NAME}
+            # - docker tag "${IMAGE_NAME}" "${IMAGE}:${VERSION}"
+            # At first push to latest version
+            - docker tag "${IMAGE_NAME}" "${IMAGE}"
+            - docker push "${IMAGE}"
+            # Push with tagged version
+            - docker tag "${IMAGE_NAME}" "${IMAGE}:${VERSION}"
+            - docker push "${IMAGE}:${VERSION}"
+          services:
+            - docker

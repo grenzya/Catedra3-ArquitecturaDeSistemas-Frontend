@@ -1,0 +1,15 @@
+node_modules
+LICENSE
+README.md
+**/.dockerignore
+**/.env*
+**/.git
+**/.gitignore
+**/.vs
+**/.vscode
+**/.idea
+**/docker-compose*
+**/Dockerfile*
+**/npm-debug.log
+**/secrets.dev.yaml
+**/values.dev.yaml
