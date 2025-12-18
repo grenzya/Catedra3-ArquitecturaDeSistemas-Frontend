@@ -24,7 +24,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/cubi12-front:latest
           build-args: |
-            backend_url=https://catedra3-backend.onrender.com
+            backend_url=https://catedra3-backend.onrender.com/api/
 
       - name: Avisar a Render (Redeploy)
         run: |
